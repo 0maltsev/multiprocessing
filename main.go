@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"sync"
 	"time"
+	"runtime"
 )
 
 // ConcurrentPartition - ConcurrentQuicksort function for partitioning the array (randomized choice of a pivot)
@@ -41,7 +42,7 @@ func ConcurrentQuicksort(A []int, p int, r int, wg *sync.WaitGroup) {
 		quickSort(q, p, k-1)
 		quickSort(q, k+1, r)
 	}
-	time.Sleep(1 * time.Second)
+	// time.Sleep(1 * time.Second)
 	defer wg.Done()
 
 }
@@ -74,22 +75,22 @@ func partition(arr []int, low, high int) ([]int, int) {
 }
 
 func main() {
-
+	// numCPUs := runtime.NumCPU()
+	runtime.GOMAXPROCS(4)
 	sortSize := 100000000
 	unsorted := make([]int, 0, sortSize)
 	unsorted = rand.Perm(sortSize)
 
 	start := time.Now()
 	
-	// var wg sync.WaitGroup
-	// wg.Add(1)
-	// go ConcurrentQuicksort(unsorted, 0, len(unsorted)-1, &wg)
-	// wg.Wait()
-	quickSortStart(unsorted)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go ConcurrentQuicksort(unsorted, 0, len(unsorted)-1, &wg)
+	wg.Wait()
+	// quickSortStart(unsorted)
 	
 	elapsed := time.Since(start)
 
 	fmt.Print(elapsed)
 
 }
-
